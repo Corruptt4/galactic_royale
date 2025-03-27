@@ -1,13 +1,23 @@
 import { ctx } from "../main.js"
 
 export class Minimap {
-    constructor(x, y, size, entities, worldSize) {
+    constructor(x, y, size, worldSize) {
         this.x = x;
         this.y = y;
-        this.size = size;
+        this.size = size*2;
+        this.cameraX = null;
+        this.cameraY = null;
         this.scaleDown = size/worldSize
-        this.entities = entities;
+        this.entities = new Map();
     }
+    update(entities) {
+        this.entities.clear();
+        entities.forEach((plr) => {
+            this.entities.set(plr.id, plr);
+        });
+    }
+    
+    
     render() {
         ctx.beginPath()
         ctx.fillStyle = "rgb(55,55,55)"
@@ -21,7 +31,7 @@ export class Minimap {
         this.entities.forEach((e) => {
             ctx.beginPath()
             ctx.fillStyle = e.border
-            ctx.arc(this.x+e.x*this.scaleDown, this.x+e.y*this.scaleDown, 1.25, 0, Math.PI * 2)
+            ctx.arc(this.x+(e.x)*this.scaleDown, this.y+(e.y)*this.scaleDown, 1.25, 0, Math.PI * 2)
             ctx.fill()
             ctx.closePath()
         })

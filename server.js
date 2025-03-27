@@ -31,6 +31,7 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect", () => {
         players = players.filter(player => player.id != socket.id)
+        io.emit("playerUpd", players)
     })
 })
 
