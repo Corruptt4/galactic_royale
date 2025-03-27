@@ -1,5 +1,3 @@
-const { create } = require("node:domain");
-
 const express = require("express")
 ,   { createServer } = require("node:http")
 ,   app = express()
