@@ -5,6 +5,7 @@ export const canvas = document.getElementById("canvas")
 
 import { PlayerSpaceship } from "./modules/entities/spaceship.js"
 import { Camera } from "./modules/camera.js"
+import { Minimap } from "./modules/minimap.js"
 
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
@@ -13,6 +14,7 @@ var players = new Map()
 ,      objects = []
 ,       myId = null
 ,       camera = new Camera()
+,       minimap = new Minimap(10, 10, 250, players, mapSize)
 
 
 socket.on("playerUpd", (plrs) => {
@@ -79,6 +81,7 @@ function render() {
     players.forEach((plr) => {
         plr.render()
     })
+    minimap.render()
 
     requestAnimationFrame(render)
 }
