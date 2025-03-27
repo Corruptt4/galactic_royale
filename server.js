@@ -14,11 +14,13 @@ var players = []
 // })
 app.use(express.static('public'))
 
+// Welcome new player.
 io.on("connection", (socket) => {
     players.push({ id: socket.id, x: Math.random()*mapSize, y: Math.random()*mapSize, speed: 0.2, rotation: 0, border: `rgb(${Math.random()*255}, ${Math.random()*255}, ${Math.random()*255})` })
 
     io.emit("playerUpd", players)
 
+    // Handle when the Player wants to move
     socket.on("move", (updatedPlayer) => {
             const player = players.find(p => p.id === updatedPlayer.id)
             if (player) {
@@ -29,6 +31,7 @@ io.on("connection", (socket) => {
         io.emit("move", players) 
     })
 
+    // Bye bye, have a nice day!
     socket.on("disconnect", () => {
         players = players.filter(player => player.id != socket.id)
         io.emit("playerUpd", players)

@@ -7,6 +7,21 @@ import { ctx } from "../main.js"
  * e = sides
  * f = radii
  */
+
+// Some context functions
+/**
+ * Polygon - Constructs a polygon with x sides and a size
+ * Rect - Constructs a rectangle (obvious)
+ * Circle - Draws a circle
+ * 
+ * May be used more into the UI part of the game.
+ * Could be used or later deleted (depends if I use it a lot)...
+ * Or changed if not seen useful for the game's code.
+ * 
+ * 
+ * Possibly more stuff gonna be added here. (possibly Trapezoid, or an entire change to include
+ *  'x' and 'y' values to make it used even more throughout the code.)
+ */
 export function contextFunctions(a, b, c, d, e, f) {
     switch (a) {
         case "Polygon":
