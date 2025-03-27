@@ -1,3 +1,6 @@
 #canvas {
-    background-color: aqua;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgb(45, 45, 45);
 }

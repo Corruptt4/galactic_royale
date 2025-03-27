@@ -6,13 +6,21 @@ const express = require("express")
 , io = new Server(server)
 , { join } = require("node:path")
 
+var players = []
+
 // app.get('/', (req, res) => {
 //     res.sendFile(join(__dirname, "public/index.html"))
 // })
 app.use(express.static('public'))
 
 io.on("connection", (socket) => {
-    console.log("Someone entered.")
+    players.push({ id: socket.id })
+
+    io.emit("playerUpd", players)
+
+    socket.on("disconnect", () => {
+        players = players.filter(player => player.id != socket.id)
+    })
 })
 
 server.listen(3000, () => {
