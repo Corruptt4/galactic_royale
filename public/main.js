@@ -1,4 +1,4 @@
-const socket = io()
+const socket = io('https://galactic-royale.vercel.app')
 export const canvas = document.getElementById("canvas")
 ,           ctx = canvas.getContext("2d")
 ,           mapSize = 1000
