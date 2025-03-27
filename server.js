@@ -4,10 +4,12 @@ const express = require("express")
 ,   server = createServer(app)
 , { Server } = require("socket.io")
 , io = new Server(server)
+, { join } = require("node:path")
 
-app.get('/', (req, res) => {
-    res.sendFile(join(__dirname, "index.html"))
-})
+// app.get('/', (req, res) => {
+//     res.sendFile(join(__dirname, "public/index.html"))
+// })
+app.use(express.static('public'))
 
 io.on("connection", (socket) => {
     console.log("Someone entered.")
