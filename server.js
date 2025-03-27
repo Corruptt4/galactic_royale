@@ -5,6 +5,7 @@ const express = require("express")
 , { Server } = require("socket.io")
 , io = new Server(server)
 , { join } = require("node:path")
+, mapSize = 1000
 
 var players = []
 
@@ -14,9 +15,19 @@ var players = []
 app.use(express.static('public'))
 
 io.on("connection", (socket) => {
-    players.push({ id: socket.id })
+    players.push({ id: socket.id, x: Math.random()*mapSize, y: Math.random()*mapSize, speed: 0.2, rotation: 0 })
 
     io.emit("playerUpd", players)
+
+    socket.on("move", (updatedPlayer) => {
+            const player = players.find(p => p.id === updatedPlayer.id)
+            if (player) {
+                player.x = updatedPlayer.x
+                player.y = updatedPlayer.y
+                player.rotation = updatedPlayer.rotation
+            }
+        io.emit("move", players) 
+    })
 
     socket.on("disconnect", () => {
         players = players.filter(player => player.id != socket.id)
