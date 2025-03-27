@@ -12,6 +12,12 @@ export class SpaceshipBody {
         this.rotSpeed = speed/100
         this.rotVel = 0
         this.velX = 0;
+        this.camera = {
+            x: 0,
+            y: 0,
+            width: window.innerWidth,
+            height: window.innerHeight,
+        }
         this.velY = 0;
         this.friction = 0.96
         this.keys = {}

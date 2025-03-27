@@ -5,7 +5,7 @@ const express = require("express")
 , { Server } = require("socket.io")
 , io = new Server(server)
 , { join } = require("node:path")
-, mapSize = 1000
+, mapSize = 5000
 
 var players = []
 
@@ -34,10 +34,6 @@ io.on("connection", (socket) => {
     })
 })
 
-module.exports = (req, res) => {
-    res.socket.server = createServer(app);
-    io.attach(res.socket.server);
-    res.socket.server.listen(3000, () => {
-      console.log('Server is running on port 3000');
-    });
-  };
+server.listen(3000, () => {
+    console.log("Server is running on port 3000")
+})

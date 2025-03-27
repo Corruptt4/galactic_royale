@@ -1,9 +1,10 @@
-const socket = io('https://galactic-royale.vercel.app')
+const socket = io()
 export const canvas = document.getElementById("canvas")
 ,           ctx = canvas.getContext("2d")
-,           mapSize = 1000
+,           mapSize = 4000
 
 import { PlayerSpaceship } from "./modules/entities/spaceship.js"
+import { Camera } from "./modules/camera.js"
 
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
@@ -11,6 +12,8 @@ canvas.height = window.innerHeight
 var players = new Map()
 ,      objects = []
 ,       myId = null
+,       camera = new Camera()
+
 
 socket.on("playerUpd", (plrs) => {
     players.clear()
@@ -60,6 +63,18 @@ function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
+    
+    ctx.beginPath()
+    ctx.fillStyle = "black"
+    ctx.fillRect(-mapSize/2, -mapSize/2, mapSize, mapSize)
+    ctx.closePath()
+
+    if (players.has(myId)) {
+        let mySpaceship = players.get(myId)
+        camera.follow(mySpaceship)
+    }
+
+    camera.apply(ctx)
 
     players.forEach((plr) => {
         plr.render()
