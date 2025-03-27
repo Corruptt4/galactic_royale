@@ -15,7 +15,7 @@ var players = new Map()
 socket.on("playerUpd", (plrs) => {
     players.clear()
     plrs.forEach((plr) => {
-        players.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, "rgb(107, 199, 182)" , 25, plr.speed, plr.rotation))
+        players.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, plr.border , 25, plr.speed, plr.rotation))
     })
 
     if (!myId) {

@@ -15,7 +15,7 @@ var players = []
 app.use(express.static('public'))
 
 io.on("connection", (socket) => {
-    players.push({ id: socket.id, x: Math.random()*mapSize, y: Math.random()*mapSize, speed: 0.2, rotation: 0 })
+    players.push({ id: socket.id, x: Math.random()*mapSize, y: Math.random()*mapSize, speed: 0.2, rotation: 0, border: `rgb(${Math.random()*255}, ${Math.random()*255}, ${Math.random()*255})` })
 
     io.emit("playerUpd", players)
 

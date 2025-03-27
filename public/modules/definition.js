@@ -1,4 +1,5 @@
 import { ctx } from "../main.js"
+import {contextFunctions} from "./contextFunctions.js"
 export class SpaceshipBody {
     constructor(x, y, sides, border, size, speed, rotation) {
         this.x = x;
@@ -23,14 +24,9 @@ export class SpaceshipBody {
         ctx.beginPath()
         ctx.translate(this.x, this.y)
         ctx.rotate(this.rotation)
-        ctx.moveTo(this.size * Math.cos(0), this.size * Math.sin(0))
-        for (let i = 0; i < this.sides+1; i++) {
-            ctx.lineTo(
-                this.size * Math.cos((i * 2 * Math.PI) / this.sides),
-                this.size * Math.sin((i * 2 * Math.PI) / this.sides)
-            )
-        }
-
+        ctx.moveTo(0, 0)
+        ctx.lineTo(this.size, 0)
+        contextFunctions("Polygon", this.size, 0, 0, this.sides, 0)
         ctx.lineJoin = "round"
         ctx.strokeStyle = this.border
         ctx.lineWidth = 2
