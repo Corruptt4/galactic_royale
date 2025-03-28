@@ -78,6 +78,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 
 const token = 'MTM1NTAzNzc0NzAxNDAwODg2Mw.GbrqrN.HBZUpPtw9JDTyJz6bZpLOFOll2U53ts9zaFCek'
 const startupChannelId = "1355040469532541088"
+const prefix = "g."
 
 client.once("ready", async () => {
     console.log("Bot is online!")
@@ -146,6 +147,12 @@ client.on("messageCreate", (message) => {
     if (message.mentions.has(client.user)) {
         message.reply(messages[Math.floor(Math.random()*messages.length)])
     }
+    // if (message.content.includes(prefix)) {
+    //     if (message.content.includes("r")) {
+    //         message.reply("@" + message.author.username)
+    //     }
+    // }
+
 })
 
 client.login(token)
