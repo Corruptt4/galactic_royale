@@ -6,6 +6,10 @@ const express = require("express")
 , io = new Server(server)
 , { join } = require("node:path")
 , mapSize = 5000
+, port = 3030
+
+// Bot notifications
+var sendConnectionMessage = false
 
 var players = []
 
@@ -16,6 +20,7 @@ app.use(express.static('public'))
 
 // Welcome new player.
 io.on("connection", (socket) => {
+    sendConnectionMessage = true
     players.push({ 
         id: socket.id, 
         x: Math.random()*mapSize, 
@@ -52,6 +57,66 @@ io.on("connection", (socket) => {
     })
 })
 
-server.listen(3000, () => {
-    console.log("Server is running on port 3000")
+server.listen(port, () => {
+    console.log("Server is running on port", port)
 })
+
+
+const { Client, GatewayIntentBits, EmbedBuilder  } = require("discord.js")
+const { send } = require("node:process")
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers] })
+
+const token = 'MTM1NTAzNzc0NzAxNDAwODg2Mw.GbrqrN.HBZUpPtw9JDTyJz6bZpLOFOll2U53ts9zaFCek'
+const startupChannelId = "1355040469532541088"
+
+client.once("ready", async () => {
+    console.log("Bot is online!")
+
+
+    const embed = new EmbedBuilder()
+    .setTitle("Game up and running.")
+    .setColor("#AFF823")
+    .setDescription("Running on localhost:"+port)
+    .setAuthor({
+        name: client.user.username, 
+        iconURL: client.user.displayAvatarURL()
+    })
+    const channel = await client.channels.fetch(startupChannelId)
+    if (channel) {
+        channel.send({ embeds: [embed] })
+    }
+    
+    setInterval(() => {
+        if (sendConnectionMessage) {
+            let connectionEmbed = new EmbedBuilder()
+            .setTitle("Player joined!")
+            .setColor("#F8823A")
+            .setDescription("A player has joined the game! " + players.length + " players.")
+            .setAuthor({
+                name: client.user.username, 
+                iconURL: client.user.displayAvatarURL()
+            })
+            
+            if (channel) {
+                channel.send("Game update!")
+                channel.send({ embeds: [connectionEmbed] })
+                sendConnectionMessage = false
+            }
+        }
+    }, 200)
+})
+let messages = [
+    "Not responding.",
+    "Ping... ping... ping.",
+    "Is that what you'll do? Ping me?",
+    "I only notify, not say stuff. Wait, I said something."
+]
+client.on("messageCreate", (message) => {
+    if (message.author.bot) return;
+
+    if (message.mentions.has(client.user)) {
+        message.reply(messages[Math.floor(Math.random()*messages.length)])
+    }
+})
+
+client.login(token)
