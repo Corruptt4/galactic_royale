@@ -10,6 +10,9 @@ const express = require("express")
 
 // Bot notifications
 var sendConnectionMessage = false
+,      sendChatMessage = false
+,      playerName = null
+,      playerMessage = null
 
 var players = []
 
@@ -20,33 +23,40 @@ app.use(express.static('public'))
 
 // Welcome new player.
 io.on("connection", (socket) => {
-    sendConnectionMessage = true
-    players.push({ 
-        id: socket.id, 
-        x: Math.random()*mapSize, 
-        y: Math.random()*mapSize, 
-        speed: 0.2, 
-        rotation: 0, 
-        border: `rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)})` 
+    socket.on("playerJoin", (name) => {
+        players.push({ 
+            id: socket.id, 
+            x: Math.random()*mapSize, 
+            y: Math.random()*mapSize, 
+            speed: 0.2, 
+            rotation: 0, 
+            border: `rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)})`,
+            name: name
+        })
+        playerName = name
+        sendConnectionMessage = true
+        io.emit("playerUpd", players)
     })
-
-    io.emit("playerUpd", players)
 
     // Handle when the Player wants to move
     socket.on("move", (updatedPlayer) => {
-            const player = players.find(p => p.id === updatedPlayer.id)
-            if (player) {
-                player.x = updatedPlayer.x
-                player.y = updatedPlayer.y
-                player.rotation = updatedPlayer.rotation
-            }
+        const player = players.find(p => p.id === updatedPlayer.id)
+        if (player) {
+            player.x = updatedPlayer.x
+            player.y = updatedPlayer.y
+            player.rotation = updatedPlayer.rotation
+        }
         io.emit("move", players) 
     })
+
 
     socket.on("sendChatMessage", (msg, which) => {
         const player = players.find(p => p.id === which?.id);
         if (player && msg.trim() !== "") { 
             io.emit("newMessage", msg, player.id);
+            sendChatMessage = true
+            playerMessage = msg
+            playerName = player.name
         }
     });
 
@@ -89,9 +99,9 @@ client.once("ready", async () => {
     setInterval(() => {
         if (sendConnectionMessage) {
             let connectionEmbed = new EmbedBuilder()
-            .setTitle("Player joined!")
+            .setTitle("A player joined!")
             .setColor("#F8823A")
-            .setDescription("A player has joined the game! " + players.length + " players.")
+            .setDescription(playerName + " has joined the game! " + players.length + " players.")
             .setAuthor({
                 name: client.user.username, 
                 iconURL: client.user.displayAvatarURL()
@@ -101,6 +111,25 @@ client.once("ready", async () => {
                 channel.send("Game update!")
                 channel.send({ embeds: [connectionEmbed] })
                 sendConnectionMessage = false
+                playerName = null;
+            }
+        }
+    }, 200)
+    setInterval(() => {
+        if (sendChatMessage) {
+            let connectionEmbed = new EmbedBuilder()
+            .setTitle(playerName + ": " + playerMessage)
+            .setColor("#AF662F")
+            .setAuthor({
+                name: client.user.username, 
+                iconURL: client.user.displayAvatarURL()
+            })
+            
+            if (channel) {
+                channel.send("Game update!")
+                channel.send({ embeds: [connectionEmbed] })
+                sendChatMessage = false
+                playerName = null;
             }
         }
     }, 200)

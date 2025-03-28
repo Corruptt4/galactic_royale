@@ -10,3 +10,37 @@
     top: 95%;
     left: 10;
 }
+
+
+#gameTitle {
+    position: absolute;
+    top: 50%;
+    left: 42%;
+    font-family: sans-serif;
+    background-color: rgb(65, 65, 65);
+    margin-top: -50px;
+    margin-left: 15px;
+}
+#setName {
+    position: absolute;
+    top: 50%;
+    left: 42%;
+    margin-left: 43px;
+    width: 200px;
+    background-color: rgb(86, 255, 199);
+    border: 3px solid rgb(66, 235, 179);
+    &:hover {
+        background-color: rgb(66, 235, 179);
+    }
+}
+#join {
+    position: absolute;
+    top: 50%;
+    left: 42%;
+    background-color: rgb(86, 255, 35);
+    border: 3px solid rgb(66, 235, 15);
+
+    &:hover {
+        background-color: rgb(66, 235, 15);
+    }
+}

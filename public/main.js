@@ -19,22 +19,37 @@ export var players = new Map()
 ,       messages = []
 
 
-socket.on("playerUpd", (plrs) => {
-    players.clear()
-    minimap.update(plrs)
-    plrs.forEach((plr) => {
-        players.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, plr.border , 25, plr.speed, plr.rotation))
-    })
+document.getElementById("join").addEventListener("click", () => {
+    const nameInp = document.getElementById("setName")
+    const name = nameInp.value.trim()
 
-    minimap.entities.clear()
-    plrs.forEach((plr) => {
-        minimap.entities.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, plr.border, 25, plr.speed, plr.rotation))
-    })
-
-    if (!myId) {
-        myId = socket.id
+    if (name == null) {
+        name = "Guest #" + Math.floor(Math.random()*10000)
     }
-    console.log(players.size)
+    socket.emit("playerJoin", name)
+    document.getElementById("setName").style.display = "none"
+    document.getElementById("join").style.display = "none"
+    document.getElementById("gameTitle").style.display = "none"
+})
+
+
+socket.on("playerUpd", (plrs) => {
+    if (plrs != null) {
+        players.clear()
+        minimap.update(plrs)
+        plrs.forEach((plr) => {
+            players.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, plr.border , 25, plr.speed, plr.rotation, plr.name))
+        })
+
+        minimap.entities.clear()
+        plrs.forEach((plr) => {
+            minimap.entities.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, plr.border, 25, plr.speed, plr.rotation, plr.name))
+        })
+
+        if (!myId) {
+            myId = socket.id
+        }
+    }
 })
 
 socket.on("move", (plrs) => {
@@ -48,7 +63,7 @@ socket.on("move", (plrs) => {
     })
     minimap.entities.clear()
     plrs.forEach((plr) => {
-        minimap.entities.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, plr.border, 25, plr.speed, plr.rotation))
+        minimap.entities.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, plr.border, 25, plr.speed, plr.rotation, plr.name))
     })
 })
 
@@ -61,12 +76,13 @@ document.getElementById("msg").addEventListener("keydown", (e) => {
 })
 
 socket.on("newMessage", (msg, id) => {
-    console.log(`Received message: "${msg}" from player ${id}`);
-    if (players.has(id)) {
-        let plr = players.get(id)
-        messages.push(new MessageBox(0.1, msg, plr));
-        console.log("Added new MessageBox:", messages.length);
-    }
+   if (id != null) {
+        if (players.has(id)) {
+            let plr = players.get(id)
+            messages.push(new MessageBox(0.1, msg, plr));
+            console.log("Added new MessageBox:", messages.length);
+        }
+   }
 })
 
 window.addEventListener("keydown", (e) => {
@@ -80,10 +96,12 @@ window.addEventListener("keyup", (e) => {
     }
 })
 function updateMyPlayerPosition() {
-    if (players.has(myId)) {
-        let myPlayer = players.get(myId);
-        myPlayer.move();
-        socket.emit("move", { id: myId, x: myPlayer.x, y: myPlayer.y, rotation: myPlayer.rotation });
+    if (myId != null) {
+        if (players.has(myId)) {
+            let myPlayer = players.get(myId);
+            myPlayer.move();
+            socket.emit("move", { id: myId, x: myPlayer.x, y: myPlayer.y, rotation: myPlayer.rotation, name: myPlayer.name});
+        }
     }
 }
 setInterval(() => {

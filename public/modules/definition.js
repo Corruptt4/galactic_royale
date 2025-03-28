@@ -1,7 +1,7 @@
 import { ctx } from "../main.js"
 import {contextFunctions} from "./contextFunctions.js"
 export class SpaceshipBody {
-    constructor(x, y, sides, border, size, speed, rotation) {
+    constructor(x, y, sides, border, size, speed, rotation, name) {
         this.x = x;
         this.y = y;
         this.size = size;
@@ -12,6 +12,8 @@ export class SpaceshipBody {
         this.rotSpeed = speed/100
         this.rotVel = 0
         this.velX = 0;
+        this.name = name
+        this.isTyping = false;
         this.camera = {
             x: 0,
             y: 0,
@@ -65,10 +67,10 @@ export class SpaceshipBody {
         if (this.keys[83]) {
             this.velY += this.speed
         }
-
         if (this.keys[81]) {
             this.rotVel -= this.rotSpeed
         }
+        
         if (this.keys[69]) {
             this.rotVel += this.rotSpeed
         }
