@@ -6,6 +6,7 @@ export const canvas = document.getElementById("canvas")
 import { PlayerSpaceship } from "./modules/entities/spaceship.js"
 import { Camera } from "./modules/camera.js"
 import { Minimap } from "./modules/minimap.js"
+import { MessageBox } from "./modules/messageBox.js"
 
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
@@ -15,6 +16,7 @@ var players = new Map()
 ,       myId = null
 ,       camera = new Camera()
 ,       minimap = new Minimap(10, 10, 125, mapSize)
+,       messages = []
 
 
 socket.on("playerUpd", (plrs) => {
@@ -48,6 +50,18 @@ socket.on("move", (plrs) => {
             plr.rotation = plrD.rotation
         }
     })
+})
+
+document.getElementById("msg").addEventListener("keydown", (e) => {
+    if (e.keyCode == 13) {
+        let val = document.getElementById("msg").value
+        socket.emit("sendChatMessage", val)
+        if (players.has(myId)) {
+            let plr = players.get(myId)
+            messages.push(new MessageBox(0.05, val, plr))
+        }
+        document.getElementById("msg").value = ""
+    }
 })
 
 window.addEventListener("keydown", (e) => {
