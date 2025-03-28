@@ -104,9 +104,6 @@ function render() {
         camera.follow(mySpaceship)
     }
     
-    messages.forEach((message) => {
-        message.render()
-    })
 
     minimap.x = 10
     minimap.y = 10
@@ -114,6 +111,9 @@ function render() {
     camera.apply(ctx)
 
 
+    messages.forEach((message) => {
+        message.render()
+    })
     players.forEach((plr) => {
         plr.render()
     })
