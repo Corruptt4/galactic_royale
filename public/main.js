@@ -56,11 +56,14 @@ document.getElementById("msg").addEventListener("keydown", (e) => {
     if (e.keyCode == 13) {
         let val = document.getElementById("msg").value
         socket.emit("sendChatMessage", val)
-        if (players.has(myId)) {
-            let plr = players.get(myId)
-            messages.push(new MessageBox(0.05, val, plr))
-        }
         document.getElementById("msg").value = ""
+    }
+})
+
+socket.on("newMessage", (msg, playerId) => {
+    if (players.has(playerId)) {
+        let plr = players.get(playerId)
+        messages.push(new MessageBox(plr.x, plr.y, msg, 25))
     }
 })
 
@@ -83,7 +86,9 @@ function updateMyPlayerPosition() {
 }
 setInterval(() => {
     updateMyPlayerPosition()
-    
+    messages.forEach(msg => {
+        msg.moveUp()
+    })
 }, 1000/60)
 // renderer
 function render() {
@@ -95,10 +100,16 @@ function render() {
         let mySpaceship = players.get(myId)
         camera.follow(mySpaceship)
     }
+    
+    messages.forEach((message) => {
+        message.render()
+    })
+
     minimap.x = 10
     minimap.y = 10
     minimap.render()
     camera.apply(ctx)
+
 
     players.forEach((plr) => {
         plr.render()

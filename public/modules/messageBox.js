@@ -13,8 +13,10 @@ export class MessageBox {
         ctx.beginPath()
         ctx.fillStyle = "rgba(255, 255, 255, 0.5)"
         ctx.font = "15px Arial"
+        ctx.textAlign = "center"
         let width = ctx.measureText(this.text)
         ctx.roundRect(this.x-10, this.y, width+20, 15, 6)
+        ctx.fillText(this.text, this.x, this.y)
         ctx.fill()
         ctx.closePath()
     }

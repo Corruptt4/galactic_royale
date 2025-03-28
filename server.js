@@ -16,7 +16,14 @@ app.use(express.static('public'))
 
 // Welcome new player.
 io.on("connection", (socket) => {
-    players.push({ id: socket.id, x: Math.random()*mapSize, y: Math.random()*mapSize, speed: 0.2, rotation: 0, border: `rgb(${Math.random()*255}, ${Math.random()*255}, ${Math.random()*255})` })
+    players.push({ 
+        id: socket.id, 
+        x: Math.random()*mapSize, 
+        y: Math.random()*mapSize, 
+        speed: 0.2, 
+        rotation: 0, 
+        border: `rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)})` 
+    })
 
     io.emit("playerUpd", players)
 
@@ -28,8 +35,15 @@ io.on("connection", (socket) => {
                 player.y = updatedPlayer.y
                 player.rotation = updatedPlayer.rotation
             }
-        io.emit("move", players) 
+        io.emit("move", player) 
     })
+
+    socket.on("sendChatMessage", (msg, which) => {
+        const player = players.find(p => p.id === which?.id);
+        if (player && msg.trim() !== "") { 
+            io.emit("newMessage", msg, player.id);
+        }
+    });
 
     // Bye bye, have a nice day!
     socket.on("disconnect", () => {
