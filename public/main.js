@@ -11,7 +11,7 @@ import { MessageBox } from "./modules/messageBox.js"
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
 
-var players = new Map()
+export var players = new Map()
 ,      objects = []
 ,       myId = null
 ,       camera = new Camera()
@@ -38,10 +38,6 @@ socket.on("playerUpd", (plrs) => {
 })
 
 socket.on("move", (plrs) => {
-    minimap.entities.clear()
-    plrs.forEach((plr) => {
-        minimap.entities.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, plr.border, 25, plr.speed, plr.rotation))
-    })
     plrs.forEach((plrD) => {
         if (players.has(plrD.id)) {
             let plr = players.get(plrD.id)
@@ -50,20 +46,26 @@ socket.on("move", (plrs) => {
             plr.rotation = plrD.rotation
         }
     })
+    minimap.entities.clear()
+    plrs.forEach((plr) => {
+        minimap.entities.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, plr.border, 25, plr.speed, plr.rotation))
+    })
 })
 
 document.getElementById("msg").addEventListener("keydown", (e) => {
     if (e.keyCode == 13) {
         let val = document.getElementById("msg").value
-        socket.emit("sendChatMessage", val)
+        socket.emit("sendChatMessage", val, {id: myId})
         document.getElementById("msg").value = ""
     }
 })
 
-socket.on("newMessage", (msg, playerId) => {
-    if (players.has(playerId)) {
-        let plr = players.get(playerId)
-        messages.push(new MessageBox(plr.x, plr.y, msg, 25))
+socket.on("newMessage", (msg, id) => {
+    console.log(`Received message: "${msg}" from player ${id}`);
+    if (players.has(id)) {
+        let plr = players.get(id)
+        messages.push(new MessageBox(0.1, msg, plr));
+        console.log("Added new MessageBox:", messages.length);
     }
 })
 
@@ -88,6 +90,7 @@ setInterval(() => {
     updateMyPlayerPosition()
     messages.forEach(msg => {
         msg.moveUp()
+        msg.expire()
     })
 }, 1000/60)
 // renderer

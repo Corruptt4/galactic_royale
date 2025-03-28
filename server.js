@@ -35,7 +35,7 @@ io.on("connection", (socket) => {
                 player.y = updatedPlayer.y
                 player.rotation = updatedPlayer.rotation
             }
-        io.emit("move", player) 
+        io.emit("move", players) 
     })
 
     socket.on("sendChatMessage", (msg, which) => {
