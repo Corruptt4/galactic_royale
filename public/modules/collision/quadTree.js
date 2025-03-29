@@ -99,7 +99,6 @@ export class QuadTree {
     }
 
     insert(point) {
-        this.boundary = new Rect(-this.setBounds/2, -this.setBounds/2, this.setBounds, this.setBounds)
 
         if (!this.boundary.contains(point)) {
             return false;

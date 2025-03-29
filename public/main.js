@@ -3,7 +3,7 @@ export const canvas = document.getElementById("canvas")
 ,           ctx = canvas.getContext("2d")
 ,           mapSize = 1000
 
-import { QuadTree } from "./modules/collision/quadTree.js"
+import { QuadTree, Rect } from "./modules/collision/quadTree.js"
 import { PlayerSpaceship } from "./modules/entities/spaceship.js"
 import { Camera } from "./modules/camera.js"
 import { Minimap } from "./modules/minimap.js"
@@ -18,7 +18,8 @@ export var players = new Map()
 ,       camera = new Camera()
 ,       minimap = new Minimap(10, 10, 125, mapSize)
 ,       messages = []
-,       qt = new QuadTree(mapSize, 20)
+,       boundary = new Rect(-mapSize/2, -mapSize/2, mapSize, mapSize)
+,       qt = new QuadTree(boundary, 20)
 
 
 document.getElementById("join").addEventListener("click", () => {
@@ -72,7 +73,6 @@ socket.on("move", (plrs) => {
     })
     
     if (qt.collisions.length > 0) {
-        console.log("collisions are found")
         // hence this is a matrix, we'll get each array
         qt.collisions.forEach((collision) => {
             let updatedPlayers = []
