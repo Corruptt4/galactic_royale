@@ -15,6 +15,7 @@ var sendConnectionMessage = false
 ,      playerMessage = null
 
 var players = []
+, playerHPs = new Map
 , system = null
 , spawnedStar = false
 
@@ -34,6 +35,8 @@ app.use(express.static('public'))
 
 // Welcome new player.
 io.on("connection", (socket) => {
+    io.emit("getPlayers", (players, playerHPs))
+    console.log(playerHPs)
    if (!spawnedStar) {
         system = {
             x: mapSize/2,
@@ -99,17 +102,36 @@ io.on("connection", (socket) => {
             })
         })
     })
+    socket.on("handlePlayer", (player) => {
+        players.find(p => p.id === player.id)
+        p.health = player.health
+        let setHP = playerHPs.get(player.id)
+        setHP.health = player.health
+        io.emit("playerUpd", players)
+    })
     socket.on("playerJoin", (name) => {
+        let team = (Math.random() < 0.5) ? 1 : 0
+        let teamColors = [
+            "rgb(255, 0, 0)",
+            "rgb(0, 0, 255)"
+        ]
+        if (!name) {
+            name = "Guest #" + Math.floor(Math.random()*9) + Math.floor(Math.random()*9) + Math.floor(Math.random()*9) + Math.floor(Math.random()*9)
+        }
         players.push({ 
             id: socket.id, 
             x: Math.random()*mapSize, 
             y: Math.random()*mapSize, 
             speed: 0.2, 
             rotation: 0, 
-            border: `rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)})`,
-            name: name || "Guest #" + Math.floor(Math.random()*9) + Math.floor(Math.random()*9) + Math.floor(Math.random()*9) + Math.floor(Math.random()*9)
+            border: teamColors[team],
+            name: name,
+            team: team+1,
+            health: 500,
+            damage: 10,
         })
-        playerName = name || "Guest #" + Math.floor(Math.random()*9) + Math.floor(Math.random()*9) + Math.floor(Math.random()*9) + Math.floor(Math.random()*9)
+        playerHPs.set(socket.id, {health: 500})
+        playerName = name
         sendConnectionMessage = true
         io.emit("playerUpd", players)
     })
@@ -138,8 +160,8 @@ io.on("connection", (socket) => {
 
     // Bye bye, have a nice day!
     socket.on("disconnect", () => {
+        io.emit("disconnection", socket.id)
         players = players.filter(player => player.id != socket.id)
-        socket.broadcast.emit("playerUpd", players); 
     })
 })
 

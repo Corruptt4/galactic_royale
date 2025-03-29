@@ -33,3 +33,28 @@ export class MessageBox {
         }
     }
 }
+export class Notification {
+    constructor(x, y, text, users) {
+        this.x = x
+        this.setX = x
+        this.targetX
+        this.y = y
+        this.text = "! " + text + " !"
+        this.users = users
+        this.width = 0
+    }
+    render() {
+        ctx.beginPath()
+        ctx.fillStyle = "white"
+        ctx.font = "15px Arial"
+        ctx.textAlign = "right"
+        this.width = ctx.measureText(this.text).width
+        ctx.fillText(this.text, this.x, this.y)
+        ctx.closePath()
+    }
+    move() {
+        this.targetX = this.setX + this.width*1.2
+        this.y += 2
+        this.x -= (this.x - this.targetX)*0.1
+    }
+}

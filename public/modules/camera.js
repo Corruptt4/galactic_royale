@@ -11,7 +11,7 @@ export class Camera {
     }
 
     apply(ctx) {
-        ctx.translate(-this.x, -this.y); 
         ctx.scale(this.zoom, this.zoom); 
+        ctx.translate(-this.x, -this.y); 
     }
 }

@@ -15,12 +15,12 @@ export class Rect {
         )
     }
 
-    intersects(range) {
+    intersects(point) {
         return !(
-            range.x - range.w > this.x + this.w ||
-            range.x + range.w < this.x - this.w ||
-            range.y - range.h > this.y + this.h ||
-            range.y + range.h < this.y - this.h 
+            point.x - point.size > this.x + this.w ||
+            point.x + point.size < this.x - this.w ||
+            point.y - point.size > this.y + this.h ||
+            point.y + point.size < this.y - this.h 
         )
     }
 }
@@ -47,23 +47,13 @@ export class QuadTree {
         this.southeast = new QuadTree(se, this.capacity)
         this.southwest = new QuadTree(sw, this.capacity)
     }
-
-    query(range) {
-        let found = []
-        if (!this.boundary.intersects(range)) {
-            return found;
-        } else {
-            for (let p of this.points) {
-                if (range.contains(p)) found.push(p)
-            }
-            if (this.divided) {
-                found = found.concat(this.northwest.query(range));
-                found = found.concat(this.northeast.query(range));
-                found = found.concat(this.southwest.query(range));
-                found = found.concat(this.southeast.query(range));
-            }
-            return found
-        }
+    reset() {
+        this.points = []
+        this.divided = false
+        this.northeast = null
+        this.northwest = null
+        this.southeast = null
+        this.southwest = null
     }
 
     findAndCheckCollisions() {
@@ -91,10 +81,11 @@ export class QuadTree {
         return this.collisions;
     }
     checkCollision(a, b) {
-        let dx = a.x - b.x;
-        let dy = a.y - b.y;
-        let distance = Math.sqrt(dx * dx + dy * dy);
-        return distance < ((a.size + b.size)*0.8);
+        let dx = b.x - a.x;
+        let dy = b.y - a.y;
+        let distance = dx * dx + dy * dy
+        let radius = a.size + b.size
+        return distance < (Math.pow(radius, 2)*((a.type == "player" && b.type == "player" && !a.isSpactating && !b.isSpectating) ? 0.8 : 1));
     }
 
     insert(point) {
@@ -104,19 +95,21 @@ export class QuadTree {
 
         if (this.points.length < this.capacity) {
             this.points.push(point)
-            return true
+        } else {
+            this.subdivide()
+            this.divided = true
+            if (this.northeast.boundary.intersects(point)) {
+                this.northeast.insert(point)
+            }
+            if (this.northwest.boundary.intersects(point)) {
+                this.northwest.insert(point)
+            }
+            if (this.southeast.boundary.intersects(point)) {
+                this.southeast.insert(point)
+            }
+            if (this.southwest.boundary.intersects(point)) {
+                this.southwest.insert(point)
+            }
         }
-        
-        if (!this.divided) {
-            this.subdivide();
-            this.divided = true;
-        }
-
-        return (
-            this.northeast.insert(point) ||
-            this.northwest.insert(point) ||
-            this.southeast.insert(point) ||
-            this.southwest.insert(point)
-        );
     }
 }

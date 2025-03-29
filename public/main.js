@@ -1,4 +1,4 @@
-const socket = io()
+export const socket = io()
 export const canvas = document.getElementById("canvas")
 ,           ctx = canvas.getContext("2d")
 ,           mapSize = 1000
@@ -22,6 +22,7 @@ export var players = new Map()
 ,       boundary = new Rect(-mapSize/2, -mapSize/2, mapSize, mapSize)
 ,       qt = new QuadTree(boundary, 20)
 ,       star = null
+,       notifs = []
 
 document.getElementById("join").addEventListener("click", () => {
     const nameInp = document.getElementById("setName")
@@ -50,23 +51,45 @@ socket.on("updateStars", (star2) => {
 })
 socket.on("playerUpd", (plrs) => {
     if (plrs != null) {
-        players.clear()
         qt.points = []
         plrs.forEach((plr) => {
-            let newPlr = new PlayerSpaceship(plr.x, plr.y, 3, plr.border , 25, plr.speed, plr.rotation, plr.name)
-            players.set(plr.id, newPlr)
-            qt.points.push(newPlr)
+            if (!players.has(plr.id)) {
+                let newPlr = new PlayerSpaceship(plr.x, plr.y, 3, plr.border , 25, plr.speed, plr.rotation, plr.name, "player", plr.team, plr.health)
+                players.set(plr.id, newPlr)
+            }
         })
 
         minimap.entities.clear()
         plrs.forEach((plr) => {
-            minimap.entities.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, plr.border, 25, plr.speed, plr.rotation, plr.name))
+            minimap.entities.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, plr.border, 25, plr.speed, plr.rotation, plr.name, "player", plr.team, plr.health))
         })
-
 
         if (!myId) {
             myId = socket.id
         }
+    }
+})
+socket.on("getPlayers", (plrs, hps) => {
+    plrs.forEach((plr) => {
+        if (!players.has(plr.id)) {
+            let newPlr = new PlayerSpaceship(plr.x, plr.y, 3, plr.border , 25, plr.speed, plr.rotation, plr.name, "player", plr.team, plr.health)
+            players.set(plr.id, newPlr)
+        }
+    })
+    plrs.forEach((plr) => {
+        let sethp = hps.get(plr.id)
+        plr.health = sethp
+    })
+    plrs.forEach((plr) => {
+        minimap.entities.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, plr.border, 25, plr.speed, plr.rotation, plr.name, "player", plr.team, plr.health))
+    })
+})
+socket.on("disconnection", id => {
+    if (players.has(id)) {
+        players.delete(id)
+    }
+    if (minimap.entities.has(id)) {
+        minimap.entities.delete(id)
     }
 })
 
@@ -83,6 +106,13 @@ socket.on("move", (plrs) => {
             }
         }
     })
+    qt.reset()
+    if (qt.points.length < 1) {
+        players.forEach((p)=> {
+            qt.insert(p)
+        })
+        qt.insert(star)
+    }
     
     if (qt.collisions.length > 0) {
         // hence this is a matrix, we'll get each array
@@ -95,19 +125,31 @@ socket.on("move", (plrs) => {
                     if (p === other) {
                         continue;
                     }
-
                     // now we can collide with others, since we're already in collision, we'll only push
-                    let angle = Math.atan2(other.y - p.y, other.x - p.x)
-                    p.velX -= 1 + Math.cos(angle)
-                    p.velY -= 1 + Math.sin(angle)
-                    other.velX += 1 + Math.cos(angle)
-                    other.velY += 1 + Math.sin(angle)
+                    if (p.type === "player" && other.type === p.type && !other.isSpectating && !p.isSpectating) {
+                        let angle = Math.atan2(other.y - p.y, other.x - p.x)
+                        if (p.team == other.team) {
+                            p.velX -= 1 + Math.cos(angle)
+                            p.velY -= 1 + Math.sin(angle)
+                            other.velX += 1 + Math.cos(angle)
+                            other.velY += 1 + Math.sin(angle)
+                        } 
+                         if (p.team != other.team) {
+                            p.velX -= 1 + Math.cos(angle)
+                            p.velY -= 1 + Math.sin(angle)
+                            other.velX += 1 + Math.cos(angle)
+                            other.velY += 1 + Math.sin(angle)
+                            other.health -= p.bodyDamage
+                            p.health -= other.bodyDamage
+                        }
+                        
+                        p.move()
+                        other.move()
+                        
+                        updatedPlayers.push(p);
+                        updatedPlayers.push(other);
+                    }
                     
-                    p.move()
-                    other.move()
-                    
-                    updatedPlayers.push(p);
-                    updatedPlayers.push(other);
                     if (!qt.checkCollision(p, other)) {
                         qt.collisions.splice(qt.collisions.indexOf(collision), 1)
                     }
@@ -176,10 +218,12 @@ setInterval(() => {
         msg.moveUp()
         msg.expire()
     })
+    notifs.forEach(notif => {
+        notif.move()
+    })
     if (star) {
         updateStar()
     }
-
     if (qt.points.length > 1) {
         qt.findAndCheckCollisions()
     }
@@ -205,12 +249,18 @@ function render() {
     messages.forEach((message) => {
         message.render()
     })
+    notifs.forEach(notif => {
+        notif.render()
+    })
     
     if (star) {
         star.render()
     }
     players.forEach((plr) => {
-        plr.render()
+        if (!plr.isSpectating) {
+            plr.render()
+            plr.mortality()
+        }
     })
 
 

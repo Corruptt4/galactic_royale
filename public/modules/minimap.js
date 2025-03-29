@@ -1,4 +1,4 @@
-import { ctx } from "../main.js"
+import { ctx, myId } from "../main.js"
 
 export class Minimap {
     constructor(x, y, size, worldSize) {
@@ -30,7 +30,7 @@ export class Minimap {
         
         this.entities.forEach((e) => {
             ctx.beginPath()
-            ctx.fillStyle = e.border
+            ctx.fillStyle = (e.id == myId) ? "rgb(255,255,255)" : e.border
             ctx.arc(this.x+(e.x)*this.scaleDown, this.y+(e.y)*this.scaleDown, 1.25, 0, Math.PI * 2)
             ctx.fill()
             ctx.closePath()
