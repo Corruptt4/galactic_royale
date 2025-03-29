@@ -1,5 +1,21 @@
 import { ctx } from "../main.js"
-import {contextFunctions} from "./contextFunctions.js"
+import {contextFunctions} from "../modules/contextFunctions.js"
+
+function darkenRGB(rgb, darken) {
+    if (typeof rgb !== "string") {
+        console.error("Invalid input to darkenRGB:", rgb);
+        return "rgb(0, 0, 0)";
+    }
+
+    let match = rgb.match(/\d+/g)
+    if (!match || match.length < 3) return rgb; 
+    
+    let r = Math.max(0, parseInt(match[0], 10) - darken);
+    let g = Math.max(0, parseInt(match[1], 10) - darken);
+    let b = Math.max(0, parseInt(match[2], 10) - darken);
+
+    return `rgb(${r}, ${g}, ${b})`;
+}
 export class SpaceshipBody {
     constructor(x, y, sides, border, size, speed, rotation, name) {
         this.x = x;
@@ -98,5 +114,71 @@ export class SpaceshipBody {
         this.rotation += this.rotVel
         this.x += this.velX
         this.y += this.velY
+    }
+}
+
+export class Planet {
+    constructor(x, y, radius, color, orbitRadius, orbitSpeed, axisRotation, star) {
+        this.x = star.x+star.size
+        this.y = star.y+star.size
+        this.radius = radius
+        this.color = color
+        this.angle = 0
+        this.orbitAngle = 0
+        this.axisRotation = axisRotation
+        this.orbitRadius = orbitRadius
+        this.orbitSpeed = orbitSpeed
+    }
+    spin() {
+        this.angle += this.axisRotation
+    }
+    render() {
+        ctx.save()
+        ctx.beginPath()
+        ctx.rotate(this.angle)
+        ctx.translate(this.x, this.y)
+        ctx.fillStyle = this.color
+        ctx.strokeStyle = darkenRGB(this.color, 15)
+        contextFunctions("Circle", this.radius, 0, 0, 0, 0)
+        ctx.clip()
+        contextFunctions("Circle", this.radius, 0, 0, 0, 0)
+        ctx.fill()
+        ctx.stroke()
+        for (let i = 0; i < 8; i++) {
+            let random = -this.radius/2 + Math.random() * this.radius
+            let random2 = -this.radius/2 + Math.random() * this.radius
+            ctx.arc(random, random2, this.radius/10, 0, Math.Pi * 2)
+            ctx.fillStyle = darkenRGB(this.color, 15)
+            ctx.fill()
+        }
+        ctx.closePath()
+        ctx.restore()
+    }
+}
+
+export class Star {
+    constructor(x, y, size, temperature, planets) {
+        this.x = x;
+        this.y = y;
+        this.size = size;
+        this.planets = planets;
+        this.temperature = temperature;
+        this.respectiveColor = "rgb(0, 0, 255)"
+    }
+    render() {
+        ctx.save()
+        ctx.shadowColor = this.respectiveColor
+        ctx.shadowBlur = this.size
+        ctx.shadowOffsetX = 0
+        ctx.shadowOffsetY = 0
+        ctx.translate(this.x, this.y)
+        ctx.beginPath()
+        ctx.fillStyle = this.respectiveColor
+        ctx.strokeStyle = darkenRGB(this.respectiveColor, 15)
+        ctx.arc(0, 0, this.size, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+        ctx.restore()
     }
 }

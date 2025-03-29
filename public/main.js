@@ -8,6 +8,7 @@ import { PlayerSpaceship } from "./modules/entities/spaceship.js"
 import { Camera } from "./modules/camera.js"
 import { Minimap } from "./modules/minimap.js"
 import { MessageBox } from "./modules/messageBox.js"
+import { Star, Planet } from "./modules/definition.js"
 
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
@@ -20,7 +21,7 @@ export var players = new Map()
 ,       messages = []
 ,       boundary = new Rect(-mapSize/2, -mapSize/2, mapSize, mapSize)
 ,       qt = new QuadTree(boundary, 20)
-
+,       star = null
 
 document.getElementById("join").addEventListener("click", () => {
     const nameInp = document.getElementById("setName")
@@ -36,6 +37,17 @@ document.getElementById("join").addEventListener("click", () => {
 })
 
 
+function updateStar() {
+    socket.emit("starUpdate", (star))
+}
+socket.on("updateStars", (star2) => {
+    star = new Star(star2.x, star2.y, star2.size, star2.temperature, [])
+    for (let i = 0; i < star2.planets.length; i++) {
+        let planet = star2.planets[i]
+        let pln = new Planet(0, 0, planet.size, planet.color, planet.orbitRadius, planet.orbitSpeed, planet.axisRotation, star)
+        star.planets.push(pln)
+    }
+})
 socket.on("playerUpd", (plrs) => {
     if (plrs != null) {
         players.clear()
@@ -164,6 +176,9 @@ setInterval(() => {
         msg.moveUp()
         msg.expire()
     })
+    if (star) {
+        updateStar()
+    }
 
     if (qt.points.length > 1) {
         qt.findAndCheckCollisions()
@@ -175,6 +190,7 @@ function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
+    
 
     if (players.has(myId)) {
         let mySpaceship = players.get(myId)
@@ -186,11 +202,13 @@ function render() {
     minimap.y = 10
     minimap.render()
     camera.apply(ctx)
-
-
     messages.forEach((message) => {
         message.render()
     })
+    
+    if (star) {
+        star.render()
+    }
     players.forEach((plr) => {
         plr.render()
     })

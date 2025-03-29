@@ -27,7 +27,6 @@ export class Rect {
 
 export class QuadTree {
     constructor(boundary, capacity) {
-        this.setBounds = boundary
         this.boundary = boundary
         this.capacity = capacity
         this.points = []
@@ -99,7 +98,6 @@ export class QuadTree {
     }
 
     insert(point) {
-
         if (!this.boundary.contains(point)) {
             return false;
         }

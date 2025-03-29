@@ -15,14 +15,90 @@ var sendConnectionMessage = false
 ,      playerMessage = null
 
 var players = []
+, system = null
+, spawnedStar = false
 
 // app.get('/', (req, res) => {
 //     res.sendFile(join(__dirname, "public/index.html"))
 // })
 app.use(express.static('public'))
+// x, y, radius, color, orbitRadius, orbitSpeed, axisRotation
+/**
+ * new Star(mapSize/2, mapSize/2, 250, 8500, [
+    new Planet(0, 0, 15, "rgb(165, 122, 182)", 280, 0.002, 0.05),
+    new Planet(0, 0, 15, "rgb(165, 255, 255)", 390, 0.0006, 0.08),
+    new Planet(0, 0, 15, "rgb(188, 255, 76)", 553, 0.0003, 0.02),
+    new Planet(0, 0, 15, "rgb(85, 85, 255)", 763, 0.000115, 0.01),
+])
+ */
 
 // Welcome new player.
 io.on("connection", (socket) => {
+   if (!spawnedStar) {
+        system = {
+            x: mapSize/2,
+            y: mapSize/2,
+            size: 200,
+            temperature: 8300,
+            planets: [
+                {
+                    x: mapSize/2,
+                    y: mapSize/2,
+                    size: 15,
+                    color: "rgb(165, 122, 182)",
+                    orbitRadius: 15,
+                    orbitSpeed: 0.0009,
+                    axisRotation: 0.05
+                }, 
+                {
+                    x: mapSize/2,
+                    y: mapSize/2,
+                    size: 20,
+                    color: "rgb(165, 255, 255)",
+                    orbitRadius: 20,
+                    orbitSpeed: 0.0003,
+                    axisRotation: 0.08
+                },
+                {
+                    x: mapSize/2,
+                    y: mapSize/2,
+                    size: 10,
+                    color: "rgb(188, 255, 76)",
+                    orbitRadius: 25,
+                    orbitSpeed: 0.0001,
+                    axisRotation: 0.02
+                },
+                {
+                    x: mapSize/2,
+                    y: mapSize/2,
+                    size: 5,
+                    color: "rgb(85, 85, 255)",
+                    orbitRadius: 50,
+                    orbitSpeed: 0.00005,
+                    axisRotation: 0.01
+                }
+            ]
+        }
+        io.emit("updateStars", (system))
+        spawnedStar = false
+   }
+    socket.on("updateStar", (star) => {
+        system.x = star.x
+        system.y = star.y
+        system.size = star.size
+        system.temperature = star.temperature
+        star.planets.forEach((planet) => {
+            system.forEach((planet2) => {
+                planet2.x = planet.x
+                planet2.y = planet.y
+                planet2.size = planet.size
+                planet2.color = planet.color
+                planet2.orbitRadius = planet.orbitRadius
+                planet2.orbitSpeed = planet.orbitSpeed
+                planet2.axisRotation = planet.axisRotation
+            })
+        })
+    })
     socket.on("playerJoin", (name) => {
         players.push({ 
             id: socket.id, 
@@ -73,6 +149,7 @@ server.listen(port, () => {
 
 
 const { Client, GatewayIntentBits, EmbedBuilder  } = require("discord.js")
+const { spawn } = require("node:child_process")
 const { send } = require("node:process")
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers] })
 
