@@ -93,7 +93,7 @@ export class QuadTree {
         let dx = a.x - b.x;
         let dy = a.y - b.y;
         let distance = Math.sqrt(dx * dx + dy * dy);
-        return distance < (a.size + b.size);
+        return distance < ((a.size + b.size)*0.8);
     }
 
     insert(point) {

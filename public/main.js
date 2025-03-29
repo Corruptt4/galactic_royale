@@ -1,7 +1,7 @@
 const socket = io()
 export const canvas = document.getElementById("canvas")
 ,           ctx = canvas.getContext("2d")
-,           mapSize = 3000
+,           mapSize = 1000
 
 import { QuadTree } from "./modules/collision/quadTree.js"
 import { PlayerSpaceship } from "./modules/entities/spaceship.js"
@@ -63,8 +63,43 @@ socket.on("move", (plrs) => {
             plr.x = plrD.x
             plr.y = plrD.y
             plr.rotation = plrD.rotation
+            qt.points = []
+            qt.points.push(plr)
         }
     })
+    
+    if (qt.collisions.length > 0) {
+        console.log("collisions are found")
+        // hence this is a matrix, we'll get each array
+        qt.collisions.forEach((collision) => {
+            let updatedPlayers = []
+            collision.forEach((p) => {
+                for (let i = 0; i < collision.length; i++) {
+                    let other = collision[i]
+                    // don't collide if we're the same player
+                    if (p === other) {
+                        continue;
+                    }
+
+                    // now we can collide with others, since we're already in collision, we'll only push
+                    let angle = Math.atan2(other.y - p.y, other.x - p.x)
+                    p.velX -= 1 + Math.cos(angle)
+                    p.velY -= 1 + Math.sin(angle)
+                    other.velX += 1 + Math.cos(angle)
+                    other.velY += 1 + Math.sin(angle)
+                    
+                    p.move()
+                    other.move()
+                    
+                    updatedPlayers.push(p);
+                    updatedPlayers.push(other);
+                    if (!qt.checkCollision(p, other)) {
+                        qt.collisions.splice(qt.collisions.indexOf(collision), 1)
+                    }
+                }
+            })
+        })
+    }
     minimap.entities.clear()
     plrs.forEach((plr) => {
         minimap.entities.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, plr.border, 25, plr.speed, plr.rotation, plr.name))
@@ -131,28 +166,6 @@ setInterval(() => {
         qt.findAndCheckCollisions()
     }
 
-    if (qt.collisions.length > 0) {
-        console.log("collisions are found")
-        // hence this is a matrix, we'll get each array
-        qt.collisions.forEach((collision) => {
-            collision.forEach((p) => {
-                for (let i = 0; i < collision.length; i++) {
-                    let other = collision[i]
-                    // don't collide if we're the same player
-                    if (p === other) {
-                        continue;
-                    }
-
-                    // now we can collide with others, since we're already in collision, we'll only push
-                    let angle = Math.atan2(other.y - p.y, other.x - p.x)
-                    p.velX -= 1 * Math.cos(angle)
-                    p.velY -= 1 * Math.sin(angle)
-                    other.velX += 1 * Math.cos(angle)
-                    other.velY += 1 * Math.sin(angle)
-                }
-            })
-        })
-    }
 }, 1000/60)
 // renderer
 function render() {

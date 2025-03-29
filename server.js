@@ -5,7 +5,7 @@ const express = require("express")
 , { Server } = require("socket.io")
 , io = new Server(server)
 , { join } = require("node:path")
-, mapSize = 5000
+, mapSize = 1000
 , port = 3030
 
 // Bot notifications
@@ -31,9 +31,9 @@ io.on("connection", (socket) => {
             speed: 0.2, 
             rotation: 0, 
             border: `rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)})`,
-            name: name
+            name: name || "Guest #" + Math.floor(Math.random()*9) + Math.floor(Math.random()*9) + Math.floor(Math.random()*9) + Math.floor(Math.random()*9)
         })
-        playerName = name
+        playerName = name || "Guest #" + Math.floor(Math.random()*9) + Math.floor(Math.random()*9) + Math.floor(Math.random()*9) + Math.floor(Math.random()*9)
         sendConnectionMessage = true
         io.emit("playerUpd", players)
     })
@@ -63,7 +63,7 @@ io.on("connection", (socket) => {
     // Bye bye, have a nice day!
     socket.on("disconnect", () => {
         players = players.filter(player => player.id != socket.id)
-        io.emit("playerUpd", players)
+        socket.broadcast.emit("playerUpd", players); 
     })
 })
 
@@ -137,7 +137,10 @@ let messages = [
     "Not responding.",
     "Ping... ping... ping.",
     "Is that what you'll do? Ping me?",
-    "I only notify, not say stuff. Wait, I said something."
+    "I only notify, not say stuff. Wait, I said something.",
+    "Have you heard of my hate to pings?",
+    "No. I am not listening to your ping.",
+    "Not checking this ping. Wait, I already did that."
 ]
 client.on("messageCreate", (message) => {
     if (message.author.bot) return;
