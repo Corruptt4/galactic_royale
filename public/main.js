@@ -3,6 +3,7 @@ export const canvas = document.getElementById("canvas")
 ,           ctx = canvas.getContext("2d")
 ,           mapSize = 3000
 
+import { QuadTree } from "./modules/collision/quadTree.js"
 import { PlayerSpaceship } from "./modules/entities/spaceship.js"
 import { Camera } from "./modules/camera.js"
 import { Minimap } from "./modules/minimap.js"
@@ -17,7 +18,7 @@ export var players = new Map()
 ,       camera = new Camera()
 ,       minimap = new Minimap(10, 10, 125, mapSize)
 ,       messages = []
-
+,       qt = new QuadTree(mapSize, 20)
 
 document.getElementById("join").addEventListener("click", () => {
     const nameInp = document.getElementById("setName")
@@ -36,15 +37,18 @@ document.getElementById("join").addEventListener("click", () => {
 socket.on("playerUpd", (plrs) => {
     if (plrs != null) {
         players.clear()
-        minimap.update(plrs)
+        qt.points = []
         plrs.forEach((plr) => {
-            players.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, plr.border , 25, plr.speed, plr.rotation, plr.name))
+            let newPlr = new PlayerSpaceship(plr.x, plr.y, 3, plr.border , 25, plr.speed, plr.rotation, plr.name)
+            players.set(plr.id, newPlr)
+            qt.points.push(newPlr)
         })
 
         minimap.entities.clear()
         plrs.forEach((plr) => {
             minimap.entities.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, plr.border, 25, plr.speed, plr.rotation, plr.name))
         })
+
 
         if (!myId) {
             myId = socket.id
@@ -72,6 +76,18 @@ document.getElementById("msg").addEventListener("keydown", (e) => {
         let val = document.getElementById("msg").value
         socket.emit("sendChatMessage", val, {id: myId})
         document.getElementById("msg").value = ""
+    }
+})
+document.getElementById("msg").addEventListener("focusin", () => {
+    if (players.has(myId)) {
+        let player = players.get(myId)
+        player.isTyping = true
+    }
+})
+document.getElementById("msg").addEventListener("focusout", () => {
+    if (players.has(myId)) {
+        let player = players.get(myId)
+        player.isTyping = false
     }
 })
 
@@ -110,6 +126,33 @@ setInterval(() => {
         msg.moveUp()
         msg.expire()
     })
+
+    if (qt.points.length > 1) {
+        qt.findAndCheckCollisions()
+    }
+
+    if (qt.collisions.length > 0) {
+        console.log("collisions are found")
+        // hence this is a matrix, we'll get each array
+        qt.collisions.forEach((collision) => {
+            collision.forEach((p) => {
+                for (let i = 0; i < collision.length; i++) {
+                    let other = collision[i]
+                    // don't collide if we're the same player
+                    if (p === other) {
+                        continue;
+                    }
+
+                    // now we can collide with others, since we're already in collision, we'll only push
+                    let angle = Math.atan2(other.y - p.y, other.x - p.x)
+                    p.velX -= 1 * Math.cos(angle)
+                    p.velY -= 1 * Math.sin(angle)
+                    other.velX += 1 * Math.cos(angle)
+                    other.velY += 1 * Math.sin(angle)
+                }
+            })
+        })
+    }
 }, 1000/60)
 // renderer
 function render() {

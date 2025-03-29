@@ -109,7 +109,6 @@ client.once("ready", async () => {
             })
             
             if (channel) {
-                channel.send("Game update!")
                 channel.send({ embeds: [connectionEmbed] })
                 sendConnectionMessage = false
                 playerName = null;
@@ -127,7 +126,6 @@ client.once("ready", async () => {
             })
             
             if (channel) {
-                channel.send("Game update!")
                 channel.send({ embeds: [connectionEmbed] })
                 sendChatMessage = false
                 playerName = null;

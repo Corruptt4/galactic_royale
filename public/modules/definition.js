@@ -41,6 +41,15 @@ export class SpaceshipBody {
         ctx.stroke()
         ctx.closePath()
         ctx.restore()
+
+        ctx.beginPath()
+        ctx.fillStyle = "white"
+        ctx.strokeStyle = "black"
+        ctx.font = "15px sans-serif"
+        ctx.textAlign = "center"
+        ctx.strokeText(this.name, this.x, this.y - this.size)
+        ctx.fillText(this.name, this.x, this.y - this.size)
+        ctx.closePath()
     }
     move() {
         /** KEY CODES
@@ -55,24 +64,31 @@ export class SpaceshipBody {
          * arrowRight -- 39
          */
 
-        if (this.keys[65]) {
-            this.velX -= this.speed
+        if (!this.isTyping) {
+            if (this.keys[65]) {
+                this.velX -= this.speed
+            }
+            if (this.keys[68]) {
+                this.velX += this.speed
+            }
+            if (this.keys[87]) {
+                this.velY -= this.speed
+            }
+            if (this.keys[83]) {
+                this.velY += this.speed
+            }
+            if (this.keys[81]) {
+                this.rotVel -= this.rotSpeed
+            }
+            
+            if (this.keys[69]) {
+                this.rotVel += this.rotSpeed
+            }
         }
-        if (this.keys[68]) {
-            this.velX += this.speed
-        }
-        if (this.keys[87]) {
-            this.velY -= this.speed
-        }
-        if (this.keys[83]) {
-            this.velY += this.speed
-        }
-        if (this.keys[81]) {
-            this.rotVel -= this.rotSpeed
-        }
-        
-        if (this.keys[69]) {
-            this.rotVel += this.rotSpeed
+        if (this.keys[13]) {
+            if (!this.isTyping) {
+                document.getElementById("msg").focus()
+            }
         }
 
         this.velX *= this.friction

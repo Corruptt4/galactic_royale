@@ -3,7 +3,7 @@ import { ctx, messages } from "../main.js"
 export class MessageBox {
     constructor(upScroll, text, user) {
         this.x = user.x
-        this.y = user.y-20
+        this.y = user.y-40
         this.upScroll = upScroll
         this.text = text
         this.user = user
