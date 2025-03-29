@@ -20,6 +20,7 @@ export var players = new Map()
 ,       messages = []
 ,       qt = new QuadTree(mapSize, 20)
 
+
 document.getElementById("join").addEventListener("click", () => {
     const nameInp = document.getElementById("setName")
     const name = nameInp.value.trim()
@@ -63,8 +64,10 @@ socket.on("move", (plrs) => {
             plr.x = plrD.x
             plr.y = plrD.y
             plr.rotation = plrD.rotation
-            qt.points = []
-            qt.points.push(plr)
+            if (qt.points.includes(plr)) {
+                qt.points.splice(qt.points.indexOf(plr), 1)
+                qt.insert(plr)
+            }
         }
     })
     

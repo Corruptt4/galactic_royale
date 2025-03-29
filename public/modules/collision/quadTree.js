@@ -1,3 +1,4 @@
+
 export class Rect {
     constructor(x, y, width, height) {
         this.x = x;
@@ -26,6 +27,7 @@ export class Rect {
 
 export class QuadTree {
     constructor(boundary, capacity) {
+        this.setBounds = boundary
         this.boundary = boundary
         this.capacity = capacity
         this.points = []
@@ -97,6 +99,7 @@ export class QuadTree {
     }
 
     insert(point) {
+        this.boundary = new Rect(-this.setBounds/2, -this.setBounds/2, this.setBounds, this.setBounds)
 
         if (!this.boundary.contains(point)) {
             return false;
