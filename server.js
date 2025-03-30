@@ -10,6 +10,7 @@ const express = require("express")
 , mapSize = 1000
 , port = 3030
 
+require('dotenv').config();
 // Bot notifications
 var sendConnectionMessage = false
 ,      sendChatMessage = false
@@ -172,9 +173,7 @@ const { Client, GatewayIntentBits, EmbedBuilder  } = require("discord.js")
 const { spawn } = require("node:child_process")
 const { send } = require("node:process")
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers] })
-require('dotenv').config();
 const token = process.env.TOKEN
-
 const startupChannelId = "1355040469532541088"
 const prefix = "g."
 
