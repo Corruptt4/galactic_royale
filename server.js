@@ -174,6 +174,7 @@ const { send } = require("node:process")
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers] })
 require('dotenv').config();
 const token = process.env.TOKEN
+
 const startupChannelId = "1355040469532541088"
 const prefix = "g."
 
