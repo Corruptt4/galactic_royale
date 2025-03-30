@@ -172,8 +172,8 @@ const { Client, GatewayIntentBits, EmbedBuilder  } = require("discord.js")
 const { spawn } = require("node:child_process")
 const { send } = require("node:process")
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers] })
-
-const token = 'MTM1NTAzNzc0NzAxNDAwODg2Mw.GbrqrN.HBZUpPtw9JDTyJz6bZpLOFOll2U53ts9zaFCek'
+require('dotenv').config();
+const token = process.env.TOKEN
 const startupChannelId = "1355040469532541088"
 const prefix = "g."
 
