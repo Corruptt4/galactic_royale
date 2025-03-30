@@ -88,8 +88,6 @@ export class SpaceshipBody {
         this.keys[e.keyCode] = pressed
     }
     render() {
-        io.emit("handlePlayer", (this))
-        this.health -= 0.5
         ctx.save()
         ctx.beginPath()
         ctx.translate(this.x, this.y)

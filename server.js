@@ -3,7 +3,9 @@ const express = require("express")
 ,   app = express()
 ,   server = createServer(app)
 , { Server } = require("socket.io")
-, io = new Server(server)
+, io = new Server(server, {
+    connectionStateRecovery: {}
+})
 , { join } = require("node:path")
 , mapSize = 1000
 , port = 3030
@@ -15,7 +17,7 @@ var sendConnectionMessage = false
 ,      playerMessage = null
 
 var players = []
-, playerHPs = new Map
+, playerHPs = new Map()
 , system = null
 , spawnedStar = false
 
@@ -104,9 +106,6 @@ io.on("connection", (socket) => {
     })
     socket.on("handlePlayer", (player) => {
         players.find(p => p.id === player.id)
-        p.health = player.health
-        let setHP = playerHPs.get(player.id)
-        setHP.health = player.health
         io.emit("playerUpd", players)
     })
     socket.on("playerJoin", (name) => {
@@ -130,7 +129,6 @@ io.on("connection", (socket) => {
             health: 500,
             damage: 10,
         })
-        playerHPs.set(socket.id, {health: 500})
         playerName = name
         sendConnectionMessage = true
         io.emit("playerUpd", players)

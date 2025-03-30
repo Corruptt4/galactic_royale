@@ -69,21 +69,6 @@ socket.on("playerUpd", (plrs) => {
         }
     }
 })
-socket.on("getPlayers", (plrs, hps) => {
-    plrs.forEach((plr) => {
-        if (!players.has(plr.id)) {
-            let newPlr = new PlayerSpaceship(plr.x, plr.y, 3, plr.border , 25, plr.speed, plr.rotation, plr.name, "player", plr.team, plr.health)
-            players.set(plr.id, newPlr)
-        }
-    })
-    plrs.forEach((plr) => {
-        let sethp = hps.get(plr.id)
-        plr.health = sethp
-    })
-    plrs.forEach((plr) => {
-        minimap.entities.set(plr.id, new PlayerSpaceship(plr.x, plr.y, 3, plr.border, 25, plr.speed, plr.rotation, plr.name, "player", plr.team, plr.health))
-    })
-})
 socket.on("disconnection", id => {
     if (players.has(id)) {
         players.delete(id)
